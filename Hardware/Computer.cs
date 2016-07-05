@@ -215,6 +215,8 @@ namespace OpenHardwareMonitor.Hardware {
       }
     }
 
+#region PRIVATE_FUNCTIONS
+
     private static void NewSection(TextWriter writer) {
       for (int i = 0; i < 8; i++)
         writer.Write("----------");
@@ -283,6 +285,8 @@ namespace OpenHardwareMonitor.Hardware {
         ReportHardware(subHardware, w);
     }
 
+#endregion
+
     public string GetReport() {
 
       using (StringWriter w = new StringWriter(CultureInfo.InvariantCulture)) {
@@ -346,6 +350,9 @@ namespace OpenHardwareMonitor.Hardware {
         return w.ToString();
       }
     }
+
+    
+
 
     public void Close() {      
       if (!open)
