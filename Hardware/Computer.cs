@@ -285,9 +285,49 @@ namespace OpenHardwareMonitor.Hardware {
         ReportHardware(subHardware, w);
     }
 
-#endregion
+        #endregion
 
-    public string GetReport() {
+        #region PERFBASE_FUNCTIONS
+
+        /// <summary>
+        /// Returns the configuration of a computer.
+        /// </summary>
+        /// <returns></returns>
+        public string GetConfig()
+        {
+            Perfbase.Config config = new Perfbase.Config();
+            config.computerName = Environment.MachineName.ToString(); //TODO
+            config.os = Environment.OSVersion.ToString();
+            config.osType = IntPtr.Size == 4 ? "32-Bit" : "64-Bit";
+            config.motherboardModel = "";
+
+            return "";
+
+        }
+
+        #endregion
+
+        #region PERFBASE_HELPERS
+
+        private string GetMotherBoardModel()
+        {
+            foreach (IGroup group in groups)
+            {
+                foreach (IHardware hardware in group.Hardware)
+                {
+                    if (hardware.HardwareType == HardwareType.Mainboard)
+                    {
+                        return hardware.Name;
+                    }
+                }
+            }
+            return "";
+        }
+
+        #endregion
+
+
+        public string GetReport() {
 
       using (StringWriter w = new StringWriter(CultureInfo.InvariantCulture)) {
 
