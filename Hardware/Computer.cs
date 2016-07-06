@@ -26,12 +26,12 @@ namespace OpenHardwareMonitor.Hardware {
 
     private bool open;
 
-    private bool mainboardEnabled = true;
-    private bool cpuEnabled = true;
-    private bool ramEnabled = true;
-    private bool gpuEnabled = true;
-    private bool fanControllerEnabled = true;
-    private bool hddEnabled = true;    
+    private bool mainboardEnabled;
+    private bool cpuEnabled;
+    private bool ramEnabled;
+    private bool gpuEnabled;
+    private bool fanControllerEnabled;
+    private bool hddEnabled;    
 
     public Computer() {
       this.settings = new Settings();
