@@ -12,7 +12,7 @@ namespace Perfbase
     public class HardwareStats
     {
         public string name;                 //Name of the device
-        public SensorType[] sensortypes;    //Contains an array of all the different
+        public List<SensorType> sensortypes;    //Contains an array of all the different
                                             //types of sensors this hardware has
                                             //which contains all those specific sensors.
     }
@@ -24,7 +24,7 @@ namespace Perfbase
     public class SensorType
     {
         public string name;
-        public Sensor[] sensors;
+        public List<Sensor> sensors;
     }
 
     /// <summary>

@@ -288,46 +288,88 @@ namespace OpenHardwareMonitor.Hardware {
         #endregion
 
         #region PERFBASE_FUNCTIONS
+        /*
+                /// <summary>
+                /// Returns the configuration of a computer.
+                /// </summary>
+                /// <returns></returns>
+                public string GetConfig()
+                {
+                    Perfbase.Config config = new Perfbase.Config();
+                    config.computerName = Environment.MachineName.ToString(); //TODO
+                    config.os = Environment.OSVersion.ToString();
+                    config.osType = IntPtr.Size == 4 ? "32-Bit" : "64-Bit";
+                    config.motherboardModel = GetNameFor(HardwareType.Mainboard);
+                    config.cpuModel = GetNameFor(HardwareType.CPU);
+                    config.ramSpace = 
+                    config.gpu = "";
+                    config.totalHDDSpace = "";
+                    config.hdd = "";
+
+
+                    return "";
+
+                }
+        */
 
         /// <summary>
-        /// Returns the configuration of a computer.
+        /// Accepts an IHardware object and a list.
+        /// Gets all the sensor types and sensor data from the hardware and sub hardware
+        /// and appends it to the specified list.
         /// </summary>
-        /// <returns></returns>
-        public string GetConfig()
+        /// <param name="hardware"></param>
+        /// <param name="hardwareStatlist"></param>
+        private void GetHardwareSensorInfo(IHardware hardware, List<Perfbase.HardwareStats> hardwareStatlist)
         {
-            Perfbase.Config config = new Perfbase.Config();
-            config.computerName = Environment.MachineName.ToString(); //TODO
-            config.os = Environment.OSVersion.ToString();
-            config.osType = IntPtr.Size == 4 ? "32-Bit" : "64-Bit";
-            config.motherboardModel = GetNameFor(HardwareType.Mainboard);
-            config.cpuModel = GetNameFor(HardwareType.CPU);
-            config.ramSpace = 
-            config.gpu = "";
-            config.totalHDDSpace = "";
-            config.hdd = "";
-            
+            Perfbase.HardwareStats hwStats = new Perfbase.HardwareStats();
+            hwStats.name = hardware.Name; //Store the name of the hardware
 
-            return "";
-
-        }
-
-        private static string GetHardwareSensorInfo(
-  IHardware hardware, TextWriter w, string space)
-        {
-            w.WriteLine("{0}|", space);
-            w.WriteLine("{0}+- {1} ({2})",
-              space, hardware.Name, hardware.Identifier);
             ISensor[] sensors = hardware.Sensors;
             Array.Sort(sensors, CompareSensor);
+
+            SensorType lastSensorType;  //hold a reference to the last sensortype we were looking at
+            lastSensorType = sensors[0].SensorType; //Initialize this with the value of the first sensor
+
+            List<Perfbase.SensorType> sensorTypeObjects = new List<Perfbase.SensorType>(); //Create a list of sensor type objects we will be storing in HardwareStats
+            int sensorTypeObjectsFoundSoFar = 0; //keep track of how many sensortype objects we have
+            sensorTypeObjects.Add(new Perfbase.SensorType()); //Initialize the list with a new object
+            sensorTypeObjects[sensorTypeObjectsFoundSoFar].name = lastSensorType.ToString(); //Initialize the name for the first one
+
             foreach (ISensor sensor in sensors)
             {
-                sensor.SensorType
-                w.WriteLine("{0}|  +- {1,-14} : {2,8:G6} {3,8:G6} {4,8:G6} ({5})",
-                  space, sensor.Name, sensor.Value, sensor.Min, sensor.Max,
-                  sensor.Identifier);
+                //Create a new sensor object and set it's values
+                Perfbase.Sensor sensorObject = new Perfbase.Sensor(); 
+                sensorObject.name = sensor.Name;
+                sensorObject.value = sensor.Value.ToString();
+
+                if (lastSensorType == sensor.SensorType) //same kind of sensor as the last one
+                {
+                    //Add this to the current list of sensors
+                    sensorTypeObjects[sensorTypeObjectsFoundSoFar].sensors.Add(sensorObject);
+                }
+                else //we're on to a new type of sensor
+                {
+                    sensorTypeObjectsFoundSoFar++; //increment the tracker
+                    sensorTypeObjects.Add(new Perfbase.SensorType()); //Add new object to list
+                    sensorTypeObjects[sensorTypeObjectsFoundSoFar].name = sensor.SensorType.ToString(); //Update the name of the next object
+                    lastSensorType = sensor.SensorType; //update the tracker
+
+                    //Add this to the NEW current list of sensors
+                    sensorTypeObjects[sensorTypeObjectsFoundSoFar].sensors.Add(sensorObject);
+                }
             }
+
+            //Add our new list of sensortypes which contains our list of sensors to the hardware stats object.
+            hwStats.sensortypes = sensorTypeObjects;
+
+            //Add our hardware stats to the Hardware stats list
+            hardwareStatlist.Add(hwStats);
+
             foreach (IHardware subHardware in hardware.SubHardware)
-                ReportHardwareSensorTree(subHardware, w, "|  ");
+            {
+                GetHardwareSensorInfo(subHardware, hardwareStatlist);
+            }
+                
         }
 
         #endregion
