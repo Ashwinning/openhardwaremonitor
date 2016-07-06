@@ -302,9 +302,32 @@ namespace OpenHardwareMonitor.Hardware {
             config.motherboardModel = GetNameFor(HardwareType.Mainboard);
             config.cpuModel = GetNameFor(HardwareType.CPU);
             config.ramSpace = 
+            config.gpu = "";
+            config.totalHDDSpace = "";
+            config.hdd = "";
+            
 
             return "";
 
+        }
+
+        private static string GetHardwareSensorInfo(
+  IHardware hardware, TextWriter w, string space)
+        {
+            w.WriteLine("{0}|", space);
+            w.WriteLine("{0}+- {1} ({2})",
+              space, hardware.Name, hardware.Identifier);
+            ISensor[] sensors = hardware.Sensors;
+            Array.Sort(sensors, CompareSensor);
+            foreach (ISensor sensor in sensors)
+            {
+                sensor.SensorType
+                w.WriteLine("{0}|  +- {1,-14} : {2,8:G6} {3,8:G6} {4,8:G6} ({5})",
+                  space, sensor.Name, sensor.Value, sensor.Min, sensor.Max,
+                  sensor.Identifier);
+            }
+            foreach (IHardware subHardware in hardware.SubHardware)
+                ReportHardwareSensorTree(subHardware, w, "|  ");
         }
 
         #endregion
@@ -333,6 +356,30 @@ namespace OpenHardwareMonitor.Hardware {
             return "Not found";
         }
 
+        private Perfbase.GPU[] GetGPUs()
+        {
+            Perfbase.GPU[] gpuArray;
+            foreach (IGroup group in groups)
+            {
+                foreach (IHardware hardware in group.Hardware)
+                {
+                    if (hardware.HardwareType == HardwareType.GpuNvidia ||
+                        hardware.HardwareType == HardwareType.GpuAti)
+                    {
+                        Perfbase.GPU gpu = new Perfbase.GPU();
+                        gpu.model = hardware.Name;
+                        foreach (ISensor sensor in hardware.Sensors)
+                        {
+                            //
+                        }
+
+                        gpu.memory = "";//Add
+                        gpuArray[gpuArray.Length] = gpu;
+                    }
+                }
+            }
+            return gpuArray;
+        }
 
         private string GetTotalRAMSpace()
         {
@@ -340,9 +387,9 @@ namespace OpenHardwareMonitor.Hardware {
             {
                 foreach (IHardware hardware in group.Hardware)
                 {
-                    if (hardware.HardwareType == hardwareType)
+                    if (hardware.HardwareType == HardwareType.RAM)
                     {
-                        return hardware.Name;
+                        return ""; //TODO : get correct ram space
                     }
                 }
             }

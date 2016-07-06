@@ -38,7 +38,7 @@ namespace OpenHardwareMonitor.Hardware.RAM {
       }
     }
 
-    public override void Update() {
+        public override void Update() {
       NativeMethods.MemoryStatusEx status = new NativeMethods.MemoryStatusEx();
       status.Length = checked((uint)Marshal.SizeOf(
           typeof(NativeMethods.MemoryStatusEx)));

@@ -33,6 +33,8 @@ namespace OpenHardwareMonitor.Hardware {
 
     string GetReport();
 
+    
+
     void Update();
 
     IHardware[] SubHardware { get; }

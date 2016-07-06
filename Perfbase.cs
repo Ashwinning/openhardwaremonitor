@@ -9,6 +9,34 @@ namespace Perfbase
 
     }
 
+    public class HardwareStats
+    {
+        public string name;                 //Name of the device
+        public SensorType[] sensortypes;    //Contains an array of all the different
+                                            //types of sensors this hardware has
+                                            //which contains all those specific sensors.
+    }
+
+    /// <summary>
+    /// This is different from OpenHardware.ISensor.SensorType
+    /// Contains a name and multiple sensors of that type.
+    /// </summary>
+    public class SensorType
+    {
+        public string name;
+        public Sensor[] sensors;
+    }
+
+    /// <summary>
+    /// This is different from OpenHardware.ISensor.Sensor
+    /// Contains a name and a value for that sensor
+    /// </summary>
+    public class Sensor
+    {
+        public string name;
+        public string value;
+    }
+
     public class Config
     {
         public string computerName; //Name of the machine

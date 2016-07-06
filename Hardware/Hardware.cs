@@ -72,6 +72,8 @@ namespace OpenHardwareMonitor.Hardware {
       }
     }
 
+    
+
     #pragma warning disable 67
     public event SensorEventHandler SensorAdded;
     public event SensorEventHandler SensorRemoved;
