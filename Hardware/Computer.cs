@@ -330,6 +330,7 @@ namespace OpenHardwareMonitor.Hardware {
                     ReportPerfSensorTree(hardware, hwStatList);
             }
 
+            Console.WriteLine("length = " + hwStatList.Count);
             return hwStatList;
 
         }
@@ -342,6 +343,10 @@ namespace OpenHardwareMonitor.Hardware {
 
             ISensor[] sensors = hardware.Sensors;
             Array.Sort(sensors, CompareSensor);
+
+            //If this device has no sensors.
+            if (sensors.Length == 0)
+                return;
 
             lastSensorType = sensors[0].SensorType; //Initialize this with the value of the first sensor
 
@@ -356,13 +361,12 @@ namespace OpenHardwareMonitor.Hardware {
                 sensorObject.name = sensor.Name;
                 sensorObject.value = sensor.Value.ToString();
                 Console.WriteLine("Adding sensor : " + sensorObject.name);
-
+                Console.WriteLine("Value : " + sensorObject.value);
 
                 if (lastSensorType == sensor.SensorType) //same kind of sensor as the last one
                 {
                     //Add this to the current list of sensors
                     hwStats.sensorTypes[sensorTypeObjectsFoundSoFar].sensors.Add(sensorObject);
-                    Console.WriteLine("Sensor types so far : " + sensorTypeObjectsFoundSoFar);
                 }
                 else //we're on to a new type of sensor
                 {
@@ -380,6 +384,8 @@ namespace OpenHardwareMonitor.Hardware {
             {
                 ReportPerfSensorTree(subHardware, hwStatList);
             }
+
+            hwStatList.Add(hwStats);
 
             return;
                         
