@@ -26,12 +26,12 @@ namespace OpenHardwareMonitor.Hardware {
 
     private bool open;
 
-    private bool mainboardEnabled;
-    private bool cpuEnabled;
-    private bool ramEnabled;
-    private bool gpuEnabled;
-    private bool fanControllerEnabled;
-    private bool hddEnabled;    
+    private bool mainboardEnabled = true;
+    private bool cpuEnabled = true;
+    private bool ramEnabled = true;
+    private bool gpuEnabled = true;
+    private bool fanControllerEnabled = true;
+    private bool hddEnabled = true;    
 
     public Computer() {
       this.settings = new Settings();
@@ -312,6 +312,11 @@ namespace OpenHardwareMonitor.Hardware {
                 }
         */
 
+        public string Test()
+        {
+            return "test successful";
+        }
+
         private SensorType lastSensorType;  //hold a reference to the last sensortype we were looking at
 
         public List<Perfbase.HardwareStats> GetPerfReport()
@@ -350,11 +355,14 @@ namespace OpenHardwareMonitor.Hardware {
                 Perfbase.Sensor sensorObject = new Perfbase.Sensor();
                 sensorObject.name = sensor.Name;
                 sensorObject.value = sensor.Value.ToString();
+                Console.WriteLine("Adding sensor : " + sensorObject.name);
+
 
                 if (lastSensorType == sensor.SensorType) //same kind of sensor as the last one
                 {
                     //Add this to the current list of sensors
                     hwStats.sensorTypes[sensorTypeObjectsFoundSoFar].sensors.Add(sensorObject);
+                    Console.WriteLine("Sensor types so far : " + sensorTypeObjectsFoundSoFar);
                 }
                 else //we're on to a new type of sensor
                 {
@@ -362,7 +370,7 @@ namespace OpenHardwareMonitor.Hardware {
                     hwStats.sensorTypes.Add(new Perfbase.SensorType()); //Add new object to list
                     hwStats.sensorTypes[sensorTypeObjectsFoundSoFar].name = sensor.SensorType.ToString(); //Update the name of the next object
                     lastSensorType = sensor.SensorType; //update the tracker
-
+                    Console.WriteLine("New sensor type found!");
                     //Add this to the NEW current list of sensors
                     hwStats.sensorTypes[sensorTypeObjectsFoundSoFar].sensors.Add(sensorObject);
                 }
