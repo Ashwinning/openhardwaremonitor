@@ -299,7 +299,9 @@ namespace OpenHardwareMonitor.Hardware {
             config.computerName = Environment.MachineName.ToString(); //TODO
             config.os = Environment.OSVersion.ToString();
             config.osType = IntPtr.Size == 4 ? "32-Bit" : "64-Bit";
-            config.motherboardModel = "";
+            config.motherboardModel = GetNameFor(HardwareType.Mainboard);
+            config.cpuModel = GetNameFor(HardwareType.CPU);
+            config.ramSpace = 
 
             return "";
 
@@ -309,19 +311,41 @@ namespace OpenHardwareMonitor.Hardware {
 
         #region PERFBASE_HELPERS
 
-        private string GetMotherBoardModel()
+        /// <summary>
+        /// Accepts a HardwareType enum and returns a single string containing
+        /// the name of the connected hardware of that type.
+        /// </summary>
+        /// <param name="hardwareType"></param>
+        /// <returns></returns>
+        private string GetNameFor(HardwareType hardwareType)
         {
             foreach (IGroup group in groups)
             {
                 foreach (IHardware hardware in group.Hardware)
                 {
-                    if (hardware.HardwareType == HardwareType.Mainboard)
+                    if (hardware.HardwareType == hardwareType)
                     {
                         return hardware.Name;
                     }
                 }
             }
-            return "";
+            //If not found
+            return "Not found";
+        }
+
+
+        private string GetTotalRAMSpace()
+        {
+            foreach (IGroup group in groups)
+            {
+                foreach (IHardware hardware in group.Hardware)
+                {
+                    if (hardware.HardwareType == hardwareType)
+                    {
+                        return hardware.Name;
+                    }
+                }
+            }
         }
 
         #endregion
