@@ -312,64 +312,69 @@ namespace OpenHardwareMonitor.Hardware {
                 }
         */
 
-        /// <summary>
-        /// Accepts an IHardware object and a list.
-        /// Gets all the sensor types and sensor data from the hardware and sub hardware
-        /// and appends it to the specified list.
-        /// </summary>
-        /// <param name="hardware"></param>
-        /// <param name="hardwareStatlist"></param>
-        private void GetHardwareSensorInfo(IHardware hardware, List<Perfbase.HardwareStats> hardwareStatlist)
+        private SensorType lastSensorType;  //hold a reference to the last sensortype we were looking at
+
+        public List<Perfbase.HardwareStats> GetPerfReport()
+        {
+
+            List<Perfbase.HardwareStats> hwStatList = new List<Perfbase.HardwareStats>();
+
+            foreach (IGroup group in groups)
+            {
+                foreach (IHardware hardware in group.Hardware)
+                    ReportPerfSensorTree(hardware, hwStatList);
+            }
+
+            return hwStatList;
+
+        }
+
+        private void ReportPerfSensorTree(IHardware hardware, List<Perfbase.HardwareStats> hwStatList)
         {
             Perfbase.HardwareStats hwStats = new Perfbase.HardwareStats();
             hwStats.name = hardware.Name; //Store the name of the hardware
+            hwStats.sensorTypes = new List<Perfbase.SensorType>();
 
             ISensor[] sensors = hardware.Sensors;
             Array.Sort(sensors, CompareSensor);
 
-            SensorType lastSensorType;  //hold a reference to the last sensortype we were looking at
             lastSensorType = sensors[0].SensorType; //Initialize this with the value of the first sensor
 
-            List<Perfbase.SensorType> sensorTypeObjects = new List<Perfbase.SensorType>(); //Create a list of sensor type objects we will be storing in HardwareStats
             int sensorTypeObjectsFoundSoFar = 0; //keep track of how many sensortype objects we have
-            sensorTypeObjects.Add(new Perfbase.SensorType()); //Initialize the list with a new object
-            sensorTypeObjects[sensorTypeObjectsFoundSoFar].name = lastSensorType.ToString(); //Initialize the name for the first one
+            hwStats.sensorTypes.Add(new Perfbase.SensorType()); //Initialize the list with a new object
+            hwStats.sensorTypes[sensorTypeObjectsFoundSoFar].name = lastSensorType.ToString(); //Initialize the name for the first one
 
             foreach (ISensor sensor in sensors)
             {
                 //Create a new sensor object and set it's values
-                Perfbase.Sensor sensorObject = new Perfbase.Sensor(); 
+                Perfbase.Sensor sensorObject = new Perfbase.Sensor();
                 sensorObject.name = sensor.Name;
                 sensorObject.value = sensor.Value.ToString();
 
                 if (lastSensorType == sensor.SensorType) //same kind of sensor as the last one
                 {
                     //Add this to the current list of sensors
-                    sensorTypeObjects[sensorTypeObjectsFoundSoFar].sensors.Add(sensorObject);
+                    hwStats.sensorTypes[sensorTypeObjectsFoundSoFar].sensors.Add(sensorObject);
                 }
                 else //we're on to a new type of sensor
                 {
                     sensorTypeObjectsFoundSoFar++; //increment the tracker
-                    sensorTypeObjects.Add(new Perfbase.SensorType()); //Add new object to list
-                    sensorTypeObjects[sensorTypeObjectsFoundSoFar].name = sensor.SensorType.ToString(); //Update the name of the next object
+                    hwStats.sensorTypes.Add(new Perfbase.SensorType()); //Add new object to list
+                    hwStats.sensorTypes[sensorTypeObjectsFoundSoFar].name = sensor.SensorType.ToString(); //Update the name of the next object
                     lastSensorType = sensor.SensorType; //update the tracker
 
                     //Add this to the NEW current list of sensors
-                    sensorTypeObjects[sensorTypeObjectsFoundSoFar].sensors.Add(sensorObject);
+                    hwStats.sensorTypes[sensorTypeObjectsFoundSoFar].sensors.Add(sensorObject);
                 }
             }
 
-            //Add our new list of sensortypes which contains our list of sensors to the hardware stats object.
-            hwStats.sensortypes = sensorTypeObjects;
-
-            //Add our hardware stats to the Hardware stats list
-            hardwareStatlist.Add(hwStats);
-
             foreach (IHardware subHardware in hardware.SubHardware)
             {
-                GetHardwareSensorInfo(subHardware, hardwareStatlist);
+                ReportPerfSensorTree(subHardware, hwStatList);
             }
-                
+
+            return;
+                        
         }
 
         #endregion
@@ -400,7 +405,7 @@ namespace OpenHardwareMonitor.Hardware {
 
         private Perfbase.GPU[] GetGPUs()
         {
-            Perfbase.GPU[] gpuArray;
+            List<Perfbase.GPU> gpuArray = new List<Perfbase.GPU>();
             foreach (IGroup group in groups)
             {
                 foreach (IHardware hardware in group.Hardware)
@@ -416,13 +421,14 @@ namespace OpenHardwareMonitor.Hardware {
                         }
 
                         gpu.memory = "";//Add
-                        gpuArray[gpuArray.Length] = gpu;
+                        gpuArray.Add(gpu);
                     }
                 }
             }
-            return gpuArray;
+            return gpuArray.ToArray();
         }
 
+        /*
         private string GetTotalRAMSpace()
         {
             foreach (IGroup group in groups)
@@ -436,7 +442,7 @@ namespace OpenHardwareMonitor.Hardware {
                 }
             }
         }
-
+        */
         #endregion
 
 
